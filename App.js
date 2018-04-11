@@ -6,33 +6,53 @@
 
 import React, { Component } from 'react';
 import {
-  Platform,
   StyleSheet,
   Text,
   View
 } from 'react-native';
+import Realm from 'realm';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { realm: null };
+  }
 
-type Props = {};
-export default class App extends Component<Props> {
+  componentWillMount() {
+    Realm.open({
+      schema: [{name: 'Dog', properties: {name: 'string'}},
+              {name: 'Cat', properties: {name: 'string'}}]
+    }).then(realm => {
+      // try {
+      //   realm.write(() => {
+      //     realm.create('Dog', {name: 'Rex-'+realm.objects('Dog').length});
+      //     // realm.create('Dog', {nameA: "1"});
+      //   });
+      // } catch (e) {
+      //   console.log(e);
+      // }
+      
+      realm.beginTransaction();
+      realm.create('Dog', {name: "TRAa"});
+      realm.create('Cat', {name: "A"});
+      // realm.cancelTransaction();
+      realm.commitTransaction();
+
+      this.setState({ realm });
+    });
+  }
+
   render() {
+    const info = this.state.realm
+      ? 'Number of dogs in this Realm: ' + this.state.realm.objects('Dog').length
+      : 'Loading...';
+
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Welcome to React Native!
+          {info}
         </Text>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
-        <Text style={styles.instructions}>
-          {instructions}
-        </Text>
+        <Text>{Realm.defaultPath}</Text>
       </View>
     );
   }
